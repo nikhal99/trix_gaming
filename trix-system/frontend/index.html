@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TriX Gaming - Solana PvP Platform</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@latest/lib/index.iife.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <h1>TriX Gaming</h1>
+                        <span class="logo-subtitle">Solana PvP Platform</span>
+                    </div>
+                    
+                    <div class="wallet-section">
+                        <div id="wallet-info" class="hidden">
+                            <div class="balance-display">
+                                <div class="balance-item">
+                                    <span class="balance-label">SOL</span>
+                                    <span class="balance-value" id="sol-balance">0.00</span>
+                                </div>
+                                <div class="balance-item">
+                                    <span class="balance-label">USDT</span>
+                                    <span class="balance-value" id="usdt-balance">0.00</span>
+                                </div>
+                                <div class="balance-item">
+                                    <span class="balance-label">GT</span>
+                                    <span class="balance-value" id="gt-balance">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="connect-wallet" class="btn btn--primary">Connect Wallet</button>
+                        <button id="disconnect-wallet" class="btn btn--secondary hidden">Disconnect</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Connection Status -->
+                <div id="connection-status" class="status-banner hidden">
+                    <div class="status status--info">
+                        <span>Not connected to wallet</span>
+                    </div>
+                </div>
+
+                <!-- Dashboard Stats -->
+                <section class="dashboard-stats">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Total Matches</h3>
+                            <span class="stat-value" id="total-matches">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Wins</h3>
+                            <span class="stat-value stat-value--success" id="wins">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Win Rate</h3>
+                            <span class="stat-value" id="win-rate">0%</span>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Total Winnings</h3>
+                            <span class="stat-value stat-value--success" id="total-winnings">0 GT</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Navigation Tabs -->
+                <nav class="tab-navigation">
+                    <button class="tab-button active" data-tab="token-purchase">Token Purchase</button>
+                    <button class="tab-button" data-tab="create-match">Create Match</button>
+                    <button class="tab-button" data-tab="active-matches">Active Matches</button>
+                    <button class="tab-button" data-tab="match-history">Match History</button>
+                </nav>
+
+                <!-- Token Purchase Section -->
+                <section id="token-purchase" class="tab-content active">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>Purchase GT Tokens</h2>
+                            <p class="text-secondary">Exchange USDT for GT tokens at 1:1 rate (1 GT = $1.00 USDT)</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="usdt-amount">USDT Amount</label>
+                                <input type="number" id="usdt-amount" class="form-control" placeholder="Enter USDT amount" min="1" step="0.01">
+                            </div>
+                            
+                            <div class="token-preview">
+                                <div class="preview-item">
+                                    <span>GT Tokens to receive:</span>
+                                    <strong id="gt-preview">0.00 GT</strong>
+                                </div>
+                                <div class="preview-item">
+                                    <span>Exchange Rate:</span>
+                                    <strong>1 USDT = 1 GT</strong>
+                                </div>
+                            </div>
+                            
+                            <button id="purchase-tokens" class="btn btn--primary btn--full-width" disabled>
+                                <span class="btn-text">Purchase Tokens</span>
+                                <div class="spinner hidden"></div>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Create Match Section -->
+                <section id="create-match" class="tab-content">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>Create New Match</h2>
+                            <p class="text-secondary">Create a PvP match and stake GT tokens. Winner takes all!</p>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="match-id">Match ID</label>
+                                <input type="text" id="match-id" class="form-control" placeholder="Enter unique match ID">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="stake-amount">Stake Amount (GT)</label>
+                                <select id="stake-amount" class="form-control">
+                                    <option value="">Select stake amount</option>
+                                    <option value="1">1 GT</option>
+                                    <option value="5">5 GT</option>
+                                    <option value="10">10 GT</option>
+                                    <option value="25">25 GT</option>
+                                    <option value="50">50 GT</option>
+                                    <option value="100">100 GT</option>
+                                </select>
+                            </div>
+                            
+                            <div class="match-preview">
+                                <div class="preview-item">
+                                    <span>Total Escrow:</span>
+                                    <strong id="total-escrow">0 GT (2 players × stake)</strong>
+                                </div>
+                                <div class="preview-item">
+                                    <span>Winner receives:</span>
+                                    <strong id="winner-prize">0 GT (100% of escrow)</strong>
+                                </div>
+                            </div>
+                            
+                            <button id="create-match-btn" class="btn btn--primary btn--full-width" disabled>
+                                <span class="btn-text">Create Match</span>
+                                <div class="spinner hidden"></div>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Active Matches Section -->
+                <section id="active-matches" class="tab-content">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>Active Matches</h2>
+                            <p class="text-secondary">Join available matches or view ongoing games</p>
+                            
+                            <div class="matches-container">
+                                <div class="matches-header">
+                                    <div class="filter-section">
+                                        <label class="form-label">Filter by Stake:</label>
+                                        <select id="stake-filter" class="form-control">
+                                            <option value="">All Stakes</option>
+                                            <option value="1">1 GT</option>
+                                            <option value="5">5 GT</option>
+                                            <option value="10">10 GT</option>
+                                            <option value="25">25 GT</option>
+                                            <option value="50">50 GT</option>
+                                            <option value="100">100 GT</option>
+                                        </select>
+                                    </div>
+                                    <button id="refresh-matches" class="btn btn--secondary">Refresh</button>
+                                </div>
+                                
+                                <div class="matches-table">
+                                    <table id="active-matches-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Match ID</th>
+                                                <th>Creator</th>
+                                                <th>Stake Amount</th>
+                                                <th>Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Dynamic content -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Match History Section -->
+                <section id="match-history" class="tab-content">
+                    <div class="card">
+                        <div class="card__body">
+                            <h2>Match History</h2>
+                            <p class="text-secondary">View completed matches and manage winnings</p>
+                            
+                            <div class="winnings-section">
+                                <div class="pending-winnings">
+                                    <h3>Pending Winnings</h3>
+                                    <div class="winnings-amount">
+                                        <span id="pending-winnings">0.00 GT</span>
+                                    </div>
+                                    <button id="withdraw-winnings" class="btn btn--primary" disabled>
+                                        <span class="btn-text">Withdraw Winnings</span>
+                                        <div class="spinner hidden"></div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="history-table">
+                                <table id="match-history-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Match ID</th>
+                                            <th>Opponent</th>
+                                            <th>Stake</th>
+                                            <th>Result</th>
+                                            <th>Winnings</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dynamic content -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Loading Modal -->
+        <div id="loading-modal" class="modal hidden">
+            <div class="modal-backdrop">
+                <div class="modal-content">
+                    <div class="loading-container">
+                        <div class="spinner-large"></div>
+                        <h3>Processing Transaction</h3>
+                        <p id="loading-message">Please confirm the transaction in your wallet...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification -->
+        <div id="notification" class="notification hidden">
+            <div class="notification-content">
+                <span id="notification-message"></span>
+                <button id="close-notification" class="notification-close">×</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

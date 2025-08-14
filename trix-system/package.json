@@ -1,0 +1,13 @@
+{
+  "name": "trix-system",
+  "version": "1.0.0",
+  "description": "TriX blockchain-based incentive and reward system",
+  "scripts": {
+    "test": "npx hardhat test",
+    "deploy": "npx hardhat run scripts/deploy.js"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.3",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0"
+  }
+}
